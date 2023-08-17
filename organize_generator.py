@@ -1,3 +1,5 @@
+import os
+
 locations = []
 folders = [['Compressed Files', '.zip', '.bin', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz'],
 
@@ -6,11 +8,11 @@ folders = [['Compressed Files', '.zip', '.bin', '.rar', '.7z', '.tar', '.gz', '.
 
            ['Documents', '.doc', '.docm', '.docx', '.dot', '.dotx', '.pdf', '.txt', '.wbk', '.wps', '.log'],
 
-           ['Pictures', '.gif', '.jpg', '.jpeg', '.png', '.psd', '.tif', '.tiff', '.webp', '.xcf'],
+           ['Pictures', '.gif', '.jpg', '.jpeg', '.png', '.psd', '.tif', '.tiff', '.webp', '.xcf', '.svg', '.ico'],
 
            ['Videos', '.vob', '.wmv', '.mov', '.mp4', '.m4v', '.m4a'],
 
-           ['Applications', '.exe', '.msi', '.msu', '.msp', '.msc', '.jar'],
+           ['Applications', '.exe', '.msi', '.msu', '.msp', '.msc', '.jar', '.iso', '.run'],
 
            ['Presentations', '.pot', '.potm', '.potx', '.ppam', '.pps', '.ppsm', '.ppsx', '.ppt', '.pptm', '.pptx',
             '.sldm', '.sldx'],
@@ -23,23 +25,30 @@ folders = [['Compressed Files', '.zip', '.bin', '.rar', '.7z', '.tar', '.gz', '.
            ['3D', '.stl', '.g3drem', '.gcode', '.sldprt', '.catpart', '.igs', '.step', '.stp', '.x3d', '.x3dv', '.x3db',
             '.x3dbz', '.sldasm'],
 
-           ['Fonts', '.ttf', '.otf', '.woff', '.woff2', '.eot', '.fnt', '.fon', '.pfb', '.pfm', '.afm', '.dfont']]
+           ['Fonts', '.ttf', '.otf', '.woff', '.woff2', '.eot', '.fnt', '.fon', '.pfb', '.pfm', '.afm', '.dfont', '.dxf']]
 
+
+print('Enter directories to organize (leave blank to continue):')
 while True:
-    location = input('Enter a directory to organize (leave blank to continue): ')
+    location = input(' > ')
     if location == '':
         break
-    locations.append(location)
+    elif os.path.exists(location):
+        locations.append(location)
+        print(f'Added {location}')
+    else:
+        print('Directory not found')
 
+print('To create a custom folder or override default configuration, enter a folder name:')
 while True:
     current_folder = []
-    folder_input = (input('Enter a folder name (leave blank for default configuration): '))
+    folder_input = input(' > ')
     if folder_input == '':
         break
     current_folder.append(folder_input)
-    i = 1
+    print(f'Enter file extensions for {current_folder}:')
     while True:
-        extension_input = input('Enter a file extension (leave blank to continue): ')
+        extension_input = input(' > ')
         if extension_input == '':
             break
         for folder in folders:
@@ -50,7 +59,7 @@ while True:
         current_folder.append(extension_input)
     folders.append(current_folder)
 
-name = input('Enter a name for this organizer: ')
+name = input('What would you like to call this organizer? >  ')
 
 program_code = f"""from shutil import move
 import os
@@ -71,10 +80,15 @@ def move_file(category):
                 new_name = filename + '(duplicate)' + file_ext
                 new_path = os.path.join(cwd, new_name)
                 os.rename(file_source, new_path)
-                move(new_path, file_destination)
+                try:
+                    move(new_path, file_destination)
+                except FileNotFoundError as exc:
+                    print(exc)
             else:
-                move(file_source, file_destination)
-
+                try:
+                    move(file_source, file_destination)
+                except FileNotFoundError as exc:
+                    print(exc)
 
 for location in locations:
     if os.path.exists(location):
@@ -91,7 +105,8 @@ for location in locations:
 
         print('Files have been organized.')
     else:
-        print(f'Directory not found')"""
+        print(f'Directory not found')
+        """
 
 with open(f'{name}.py', 'w') as f:
     f.write(program_code)
